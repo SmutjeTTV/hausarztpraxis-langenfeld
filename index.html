@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hausarztpraxis am Rathaus Langenfeld</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Hausarztpraxis am Rathaus Langenfeld – Allgemeinmedizin, Innere Medizin, Betriebsmedizin, Reisemedizin und Gelbfieberimpfstelle." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Leaflet (OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style>
+    :root {
+      --color-primary: #5B92E5;
+      --color-secondary: #5EC4B6;
+      --color-accent: #F47C7C;
+      --color-bg: #F7FAFD;
+      --color-bg-soft: #E6F0FF;
+      --color-text: #22313F;
+      --color-white: #FFFFFF;
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.06);
+      --radius-card: 12px;
+      --radius-pill: 999px;
+      --max-width: 1080px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--color-white);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    }
+
+    .top-bar {
+      background: var(--color-bg-soft);
+      font-size: 0.85rem;
+      padding: 0.4rem 1.25rem;
+      text-align: center;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    .top-bar span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .top-bar-icon {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ===== KEYFRAMES ===== */
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInLeft {
+      from { opacity: 0; transform: translateX(-60px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeInRight {
+      from { opacity: 0; transform: translateX(60px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1);   opacity: 1; }
+      50%      { transform: scale(1.4); opacity: 0.6; }
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    /* ===== SCROLL REVEAL ===== */
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal.from-left {
+      transform: translateX(-60px);
+    }
+
+    .reveal.from-right {
+      transform: translateX(60px);
+    }
+
+    .reveal.from-scale {
+      transform: scale(0.85);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0) translateX(0) scale(1);
+    }
+
+    .stagger-1 { transition-delay: 0.08s; }
+    .stagger-2 { transition-delay: 0.18s; }
+    .stagger-3 { transition-delay: 0.28s; }
+    .stagger-4 { transition-delay: 0.38s; }
+    .stagger-5 { transition-delay: 0.48s; }
+    .stagger-6 { transition-delay: 0.58s; }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      animation: fadeInUp 0.7s ease-out 0.15s both;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .brand-title {
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .brand-subtitle {
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .icon-button {
+      border-radius: 999px;
+      border: 1px solid var(--color-primary);
+      background: var(--color-white);
+      color: var(--color-primary);
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .icon-button:hover {
+      background: var(--color-primary);
+      color: var(--color-white);
+      transform: scale(1.06);
+      box-shadow: 0 4px 18px rgba(91, 146, 229, 0.4);
+      text-decoration: none;
+    }
+
+    .icon-button span {
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      border-radius: var(--radius-pill);
+      border: none;
+      background: var(--color-primary);
+      color: var(--color-white);
+      padding: 0.5rem 1.1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 4px 16px rgba(91, 146, 229, 0.35);
+      white-space: nowrap;
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+      background-size: 200% 100%;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    .btn-primary:hover {
+      background: #4A7ED0;
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 10px 30px rgba(91, 146, 229, 0.5);
+      text-decoration: none;
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-secondary {
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-primary);
+      background: rgba(91, 146, 229, 0.05);
+      color: var(--color-primary);
+      padding: 0.5rem 1.1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-primary);
+      color: var(--color-white);
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 8px 24px rgba(91, 146, 229, 0.35);
+      text-decoration: none;
+    }
+
+    .btn-secondary:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    main {
+      flex: 1;
+    }
+
+    section {
+      padding: 2.25rem 0;
+    }
+
+    section:nth-of-type(odd) {
+      background: transparent;
+    }
+
+    section:nth-of-type(even) {
+      background: var(--color-white);
+    }
+
+    .section-title {
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .section-intro {
+      margin-bottom: 1.5rem;
+      max-width: 40rem;
+    }
+
+    .hero {
+      padding-top: 2.5rem;
+      padding-bottom: 2rem;
+    }
+
+    .hero-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .hero-text h1 {
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      font-size: 1.9rem;
+      margin: 0 0 0.75rem;
+    }
+
+    .hero-text p {
+      margin: 0 0 0.75rem;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .hero-meta {
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .hero-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-image img {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .info-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .info-box {
+      border-radius: var(--radius-card);
+      padding: 1rem;
+      background: var(--color-white);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.4s ease;
+    }
+
+    .info-box:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-box-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .info-box-content h3 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .info-box-content p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .info-standard {
+      background: #E6F4F4;
+    }
+
+    .info-standard .info-box-icon {
+      background: var(--color-secondary);
+      color: var(--color-white);
+    }
+
+    .info-alert {
+      background: #FFECEC;
+    }
+
+    .info-alert .info-box-icon {
+      background: var(--color-accent);
+      color: var(--color-white);
+    }
+
+    .cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--color-white);
+      border-radius: var(--radius-card);
+      padding: 1rem;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.4s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .schedule-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .schedule-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .schedule-list li span:first-child {
+      font-weight: 500;
+    }
+
+    .muted {
+      opacity: 0.8;
+      font-size: 0.85rem;
+    }
+
+    .card-actions {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .link-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .team-scroller {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+      scroll-snap-type: x mandatory;
+    }
+
+    .team-card {
+      min-width: 190px;
+      max-width: 210px;
+      background: var(--color-white);
+      border-radius: var(--radius-card);
+      padding: 0.85rem;
+      box-shadow: var(--shadow-soft);
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.35rem;
+      font-size: 0.9rem;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.45s ease;
+    }
+
+    .team-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+    }
+
+    .team-portrait {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      object-position: top center;
+      border-radius: 999px;
+      margin-bottom: 0.5rem;
+      border: 3px solid var(--color-bg-soft);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.4s ease,
+                  box-shadow 0.4s ease;
+    }
+
+    .team-card:hover .team-portrait {
+      transform: scale(1.12);
+      border-color: var(--color-primary);
+      box-shadow: 0 8px 28px rgba(91, 146, 229, 0.3);
+    }
+
+    .team-role {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .service-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .service-card {
+      background: var(--color-white);
+      border-radius: var(--radius-card);
+      padding: 1rem;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.4s ease,
+                  border-color 0.4s ease;
+      border: 2px solid transparent;
+    }
+
+    .service-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.1);
+      border-color: var(--color-primary);
+    }
+
+    .service-card h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .service-tag {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(91, 146, 229, 0.09);
+      color: var(--color-primary);
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .service-card:hover .service-tag {
+      background: var(--color-primary);
+      color: var(--color-white);
+    }
+
+    .service-list {
+      margin: 0.35rem 0 0.5rem;
+      padding-left: 1.1rem;
+    }
+
+    .service-list li {
+      margin-bottom: 0.15rem;
+    }
+
+    #map {
+      width: 100%;
+      height: 280px;
+      border-radius: var(--radius-card);
+      margin-bottom: 0.75rem;
+      z-index: 1;
+    }
+
+    .address-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .address-block .address-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+
+    .address-block .address-icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--color-bg-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .address-block .address-detail strong {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .route-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-primary);
+      background: rgba(91, 146, 229, 0.05);
+      color: var(--color-primary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .route-btn:hover {
+      background: var(--color-primary);
+      color: var(--color-white);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(91, 146, 229, 0.35);
+      text-decoration: none;
+    }
+
+    footer {
+      background: var(--color-white);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 1.75rem 0 1.25rem;
+      font-size: 0.85rem;
+    }
+
+    .footer-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .footer-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .footer-links a {
+      transition: transform 0.25s ease, color 0.25s ease;
+      display: inline-block;
+    }
+
+    .footer-links a:hover {
+      transform: translateX(6px);
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .footer-bottom {
+      margin-top: 1rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+      padding-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: space-between;
+      opacity: 0.8;
+    }
+
+    @media (min-width: 768px) {
+      .header-inner {
+        padding: 0.9rem 2rem;
+      }
+
+      .top-bar {
+        padding: 0.4rem 2rem;
+      }
+
+      .hero {
+        padding-top: 3rem;
+        padding-bottom: 2.75rem;
+      }
+
+      .hero-inner {
+        flex-direction: row;
+        align-items: stretch;
+      }
+
+      .hero-text, .hero-image {
+        width: 50%;
+      }
+
+      .hero-image {
+        align-self: center;
+      }
+
+      .info-grid,
+      .cards-grid,
+      .footer-grid {
+        flex-direction: row;
+      }
+
+      .info-box,
+      .card {
+        flex: 1;
+      }
+
+      .service-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .footer-col {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="top-bar" aria-label="Wichtiger Hinweis">
+        <span>
+          <span class="top-bar-icon" aria-hidden="true"></span>
+          Bitte tragen Sie bei Erkältungssymptomen weiterhin eine FFP2-Maske.
+        </span>
+      </div>
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-title">Hausarztpraxis am Rathaus Langenfeld</div>
+          <div class="brand-subtitle">Allgemeinmedizin · Innere Medizin (hausärztlich) · Betriebsmedizin · Reisemedizin</div>
+        </div>
+        <div class="header-actions">
+          <a class="icon-button" href="tel:0217376908">
+            <span aria-hidden="true">📞</span>
+            <span>02173 76908</span>
+          </a>
+          <a class="btn-primary" href="#online-termin">
+            Online-Termin
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-heading">
+        <div class="container">
+          <div class="hero-inner">
+            <div class="hero-text reveal from-left">
+              <h1 id="hero-heading">Herzlich willkommen in der Hausarztpraxis am Rathaus in Langenfeld</h1>
+              <p>
+                Wir freuen uns, Sie auf unserer Internetseite begrüßen zu dürfen und Ihnen einen Einblick in unsere Hausarztpraxis am Rathaus zu vermitteln.
+                Wir legen besonderen Wert auf eine persönliche Beziehung zu unseren Patienten und geben unser Bestes, Sie medizinisch optimal zu betreuen.
+              </p>
+              <p>
+                Im Rahmen unserer hausärztlichen Tätigkeit bieten wir ein breites Spektrum allgemeinmedizinischer und internistischer Methoden – von der Untersuchung bis zur Therapie.
+              </p>
+              <div class="hero-cta">
+                <a class="btn-primary" href="#online-termin">Online-Termin buchen</a>
+                <a class="btn-secondary" href="tel:0217376908">Jetzt anrufen 02173 76908</a>
+              </div>
+              <p class="hero-meta">
+                Konrad-Adenauer-Platz 4, 40764 Langenfeld (Rheinland) · Telefon: 02173 76908
+              </p>
+            </div>
+
+            <aside class="hero-image reveal from-right" aria-label="Praxis-Empfangsbereich">
+              <img src="bilder/praxis-empfang.jpg" alt="Empfangsbereich der Hausarztpraxis am Rathaus Langenfeld" style="border-radius:var(--radius-card); box-shadow:var(--shadow-soft); width:100%; object-fit:cover;">
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="section-hinweise">
+        <div class="container">
+          <h2 class="section-title reveal" id="section-hinweise">Wichtige Hinweise</h2>
+          <div class="info-grid">
+            <article class="info-box info-standard reveal stagger-1">
+              <div class="info-box-icon" aria-hidden="true">😷</div>
+              <div class="info-box-content">
+                <h3>FFP2-Masken bei Erkältungserkrankungen</h3>
+                <p>
+                  Obwohl es keine Maskenpflicht mehr in den Arztpraxen gibt, möchten wir Sie bitten, bei Erkältungserkrankungen
+                  (grippale Infekte, Covid oder andere) mit z.B. Husten, Halsschmerzen oder Fieber trotzdem eine FFP2-Maske zu tragen –
+                  zum Schutz unserer Mitarbeiterinnen und der anderen Patienten. DANKE.
+                </p>
+              </div>
+            </article>
+
+            <article class="info-box info-alert reveal stagger-2">
+              <div class="info-box-icon" aria-hidden="true">⚠️</div>
+              <div class="info-box-content">
+                <h3>Notfälle & ärztlicher Bereitschaftsdienst</h3>
+                <p>
+                  In lebensbedrohlichen Notfällen wählen Sie bitte den Notruf <strong>112</strong>.<br>
+                  Außerhalb unserer Sprechzeiten erreichen Sie den ärztlichen Bereitschaftsdienst unter der Rufnummer <strong>116117</strong>.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="section-sprechzeiten">
+        <div class="container">
+          <h2 class="section-title reveal" id="section-sprechzeiten">Sprechzeiten & Kontakt</h2>
+          <p class="section-intro reveal stagger-1">
+            Vereinbaren Sie Ihren Termin bequem online oder telefonisch. Bitte beachten Sie unsere Sprechzeiten und den Notdienstplan.
+          </p>
+          <div class="cards-grid">
+            <article class="card reveal from-left stagger-2" aria-label="Sprechzeiten">
+              <h3>Unsere Sprechzeiten</h3>
+              <ul class="schedule-list">
+                <li><span>Montag</span><span>08–12 Uhr &amp; 14–16 Uhr</span></li>
+                <li><span>Dienstag</span><span>07–13 Uhr</span></li>
+                <li><span>Mittwoch</span><span>08–12 Uhr</span></li>
+                <li><span>Donnerstag</span><span>08–12 Uhr &amp; 16–18 Uhr</span></li>
+                <li><span>Freitag</span><span>08–12 Uhr</span></li>
+              </ul>
+              <p class="muted">und nach Vereinbarung · Bitte beachten Sie auch den Notdienstplan.</p>
+            </article>
+
+            <article class="card reveal from-right stagger-3" aria-label="Kontakt-Schnellzugriff">
+              <h3>Schnellkontakt</h3>
+              <p><strong>Telefon:</strong> <a href="tel:0217376908">02173 76908</a></p>
+              <p>
+                <strong>Adresse:</strong><br>
+                Hausarztpraxis am Rathaus<br>
+                Konrad-Adenauer-Platz 4<br>
+                40764 Langenfeld (Rheinland)
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="section-team">
+        <div class="container">
+          <h2 class="section-title reveal" id="section-team">Unser Praxisteam</h2>
+          <p class="section-intro reveal stagger-1">
+            In der Hausarztpraxis am Rathaus Langenfeld betreut Sie ein erfahrenes Team aus Fachärztinnen und Fachärzten
+            für Allgemeinmedizin und Innere Medizin sowie engagierte Mitarbeiterinnen am Empfang und in der Diagnostik.
+          </p>
+
+          <div class="team-scroller" aria-label="Überblick über das Ärzteteam">
+            <article class="team-card reveal from-scale stagger-2">
+              <img class="team-portrait" src="bilder/aerztin-portrait-1.jpg" alt="Dr. med. Janine Kühnel">
+              <strong>Dr. med. Janine Kühnel</strong>
+              <div class="team-role">Fachärztin für Allgemeinmedizin</div>
+            </article>
+
+            <article class="team-card reveal from-scale stagger-3">
+              <img class="team-portrait" src="bilder/arzt-portrait-1.jpg" alt="Christoph Baur">
+              <strong>Christoph Baur</strong>
+              <div class="team-role">Facharzt für Innere Medizin (hausärztlich)</div>
+            </article>
+
+            <article class="team-card reveal from-scale stagger-4">
+              <img class="team-portrait" src="bilder/aerztin-portrait-2.jpg" alt="Dr. med. Simone Baur">
+              <strong>Dr. med. Simone Baur</strong>
+              <div class="team-role">Fachärztin für Innere Medizin (hausärztlich)</div>
+            </article>
+
+            <article class="team-card reveal from-scale stagger-5">
+              <img class="team-portrait" src="bilder/arzt-portrait-2.jpg" alt="Dr. med. Martin Kühnel">
+              <strong>Dr. med. Martin Kühnel</strong>
+              <div class="team-role">Facharzt für Allgemeinmedizin (angestellt)</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="section-leistungen">
+        <div class="container">
+          <h2 class="section-title reveal" id="section-leistungen">Unsere Leistungen</h2>
+          <p class="section-intro reveal stagger-1">
+            Im Rahmen unserer hausärztlichen Tätigkeit bieten wir ein breites Spektrum allgemeinmedizinischer und internistischer Methoden –
+            von der Untersuchung bis zur Therapie. Ergänzend dazu sind wir betriebsmedizinisch tätig, beraten Sie reisemedizinisch
+            und sind als Gelbfieberimpfstelle zugelassen.
+          </p>
+
+          <div class="service-grid">
+            <article class="service-card reveal stagger-2">
+              <div class="service-tag">Hausärztliche Versorgung</div>
+              <h3>Allgemeinmedizin &amp; Innere Medizin (hausärztlich)</h3>
+              <ul class="service-list">
+                <li>Erste Anlaufstelle bei akuten und chronischen Erkrankungen</li>
+                <li>Hausärztliche Betreuung und Verlaufskontrollen</li>
+                <li>Internistische Untersuchungen im Rahmen der hausärztlichen Versorgung</li>
+              </ul>
+            </article>
+
+            <article class="service-card reveal stagger-3">
+              <div class="service-tag">Vorsorge</div>
+              <h3>Vorsorgeuntersuchungen &amp; Impfungen</h3>
+              <ul class="service-list">
+                <li>Beratung zu empfohlenen Vorsorgeangeboten</li>
+                <li>Erstellung individueller Impfpläne</li>
+              </ul>
+            </article>
+
+            <article class="service-card reveal stagger-4">
+              <div class="service-tag">Reisemedizin</div>
+              <h3>Reisemedizin &amp; Gelbfieberimpfstelle</h3>
+              <ul class="service-list">
+                <li>Reiseimpfberatung vor Auslandsaufenthalten</li>
+                <li>Planung notwendiger und sinnvoller Schutzimpfungen</li>
+                <li>Offizielle Gelbfieberimpfstelle</li>
+              </ul>
+            </article>
+
+            <article class="service-card reveal stagger-5">
+              <div class="service-tag">Arbeitswelt</div>
+              <h3>Betriebsmedizin / Praxis für Arbeitsmedizin</h3>
+              <ul class="service-list">
+                <li>Betriebsärztliche Untersuchungen und Beratungen</li>
+                <li>Unterstützung von Unternehmen in Fragen des Arbeits- und Gesundheitsschutzes</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="online-termin" aria-labelledby="section-online-termin">
+        <div class="container">
+          <h2 class="section-title reveal" id="section-online-termin">Online-Terminbuchung</h2>
+          <p class="section-intro reveal stagger-1">
+            Die ONLINE-Terminbuchung ist nur möglich
+            <br>für in unserer Praxis bekannte Patienten
+            <br>oder
+            <br>für betriebsmedizinische Termine unter Angabe der Firma/Praxis und der gewünschten Untersuchung.
+          </p>
+
+          <div class="cards-grid">
+            <article class="card reveal from-left stagger-2">
+              <h3>Bestandspatientinnen und -patienten</h3>
+              <p>
+                Nutzen Sie die Online-Terminbuchung bitte für planbare Termine, wenn Sie bereits Patientin oder Patient unserer Praxis sind.
+              </p>
+            </article>
+
+            <article class="card reveal from-right stagger-3">
+              <h3>Betriebsmedizinische Termine</h3>
+              <p>
+                Für betriebsmedizinische Termine geben Sie bitte bei der Buchung Ihre Firma/Praxis und die gewünschte Untersuchung an.
+              </p>
+            </article>
+          </div>
+
+          <p class="muted" style="margin-top:1rem;">
+            In akuten oder dringenden Fällen sowie bei Unsicherheiten bitten wir Sie, uns telefonisch unter <a href="tel:0217376908">02173 76908</a> zu kontaktieren.
+          </p>
+        </div>
+      </section>
+
+      <section id="kontakt" aria-labelledby="section-kontakt">
+        <div class="container">
+          <h2 class="section-title reveal" id="section-kontakt">Kontakt &amp; Anfahrt</h2>
+          <div class="cards-grid">
+            <article class="card reveal from-left stagger-1" aria-label="Kontaktinformationen">
+              <h3>Kontakt</h3>
+              <div class="address-block">
+                <div class="address-row">
+                  <div class="address-icon" aria-hidden="true">📍</div>
+                  <div class="address-detail">
+                    <strong>Adresse</strong>
+                    Hausarztpraxis am Rathaus<br>
+                    Konrad-Adenauer-Platz 4<br>
+                    40764 Langenfeld (Rheinland)
+                  </div>
+                </div>
+                <div class="address-row">
+                  <div class="address-icon" aria-hidden="true">📞</div>
+                  <div class="address-detail">
+                    <strong>Telefon</strong>
+                    <a href="tel:0217376908">02173 76908</a>
+                  </div>
+                </div>
+                <div class="address-row">
+                  <div class="address-icon" aria-hidden="true">🕐</div>
+                  <div class="address-detail">
+                    <strong>Sprechzeiten</strong>
+                    Mo 08–12 &amp; 14–16 · Di 07–13 · Mi 08–12<br>
+                    Do 08–12 &amp; 16–18 · Fr 08–12<br>
+                    und nach Vereinbarung
+                  </div>
+                </div>
+              </div>
+              <a class="route-btn" href="https://www.openstreetmap.org/directions?from=&to=51.1083%2C6.9483#map=17/51.1083/6.9483" target="_blank" rel="noopener">
+                Route planen (OpenStreetMap)
+              </a>
+            </article>
+
+            <article class="card reveal from-right stagger-2" id="anfahrt" aria-label="Anfahrt">
+              <h3>Ihr Weg zu uns</h3>
+              <div id="map" aria-label="Karte: Standort der Hausarztpraxis am Rathaus Langenfeld"></div>
+              <p class="muted">
+                Unsere Praxis liegt zentral am Konrad-Adenauer-Platz direkt am Rathaus Langenfeld.
+                Parkmöglichkeiten finden Sie in der Umgebung.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-title">Hausarztpraxis am Rathaus</div>
+            <div>
+              Konrad-Adenauer-Platz 4<br>
+              40764 Langenfeld (Rheinland)<br>
+              Telefon: <a href="tel:0217376908">02173 76908</a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <div class="footer-title">Navigation</div>
+            <div class="footer-links">
+              <a href="#hero-heading">Startseite</a>
+              <a href="#section-team">Praxisteam</a>
+              <a href="#section-leistungen">Leistungen</a>
+              <a href="#online-termin">Online-Termin</a>
+              <a href="#kontakt">Kontakt &amp; Anfahrt</a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <div class="footer-title">Service</div>
+            <div class="footer-links">
+              <a href="#!">Notdienstplan</a>
+              <a href="#!">Datenschutzinformationen</a>
+              <a href="#!">Impressum</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <span>© Hausarztpraxis am Rathaus</span>
+          <span>Erstellt auf Basis von <code>hausarztpraxis-rathaus.de</code></span>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <script>
+    // OpenStreetMap
+    var lat = 51.1083;
+    var lng = 6.9483;
+    var map = L.map('map').setView([lat, lng], 16);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var marker = L.marker([lat, lng]).addTo(map);
+    marker.bindPopup(
+      '<strong>Hausarztpraxis am Rathaus</strong><br>' +
+      'Konrad-Adenauer-Platz 4<br>' +
+      '40764 Langenfeld (Rheinland)<br>' +
+      '<a href="tel:0217376908">02173 76908</a>'
+    ).openPopup();
+
+    // Scroll-Reveal Animations
+    document.addEventListener('DOMContentLoaded', function () {
+      var reveals = document.querySelectorAll('.reveal');
+
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.12,
+          rootMargin: '0px 0px -40px 0px'
+        });
+
+        reveals.forEach(function (el) {
+          observer.observe(el);
+        });
+      } else {
+        reveals.forEach(function (el) {
+          el.classList.add('visible');
+        });
+      }
+
+      // Smooth scroll for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+          var target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+

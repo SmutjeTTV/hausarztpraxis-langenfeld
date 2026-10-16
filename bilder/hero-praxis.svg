@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="1200" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E6F0FF"/>
+      <stop offset="100%" stop-color="#F7FAFD"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#EDF2F7"/>
+    </linearGradient>
+    <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D4A96A"/>
+      <stop offset="100%" stop-color="#B8935A"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C8E0FF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#5B92E5" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="500" fill="url(#bg)"/>
+
+  <!-- Floor -->
+  <rect x="0" y="360" width="1200" height="140" fill="#E8DDD0" rx="0"/>
+  <line x1="0" y1="360" x2="1200" y2="360" stroke="#D4C8B8" stroke-width="1"/>
+
+  <!-- Back wall -->
+  <rect x="80" y="60" width="1040" height="300" fill="url(#wall)" rx="4"/>
+
+  <!-- Window left -->
+  <rect x="120" y="90" width="200" height="200" fill="url(#glass)" rx="4" stroke="#B8CDE8" stroke-width="2"/>
+  <line x1="220" y1="90" x2="220" y2="290" stroke="#B8CDE8" stroke-width="1.5"/>
+  <line x1="120" y1="190" x2="320" y2="190" stroke="#B8CDE8" stroke-width="1.5"/>
+
+  <!-- Window right -->
+  <rect x="880" y="90" width="200" height="200" fill="url(#glass)" rx="4" stroke="#B8CDE8" stroke-width="2"/>
+  <line x1="980" y1="90" x2="980" y2="290" stroke="#B8CDE8" stroke-width="1.5"/>
+  <line x1="880" y1="190" x2="1080" y2="190" stroke="#B8CDE8" stroke-width="1.5"/>
+
+  <!-- Reception desk -->
+  <rect x="380" y="280" width="440" height="120" fill="url(#desk)" rx="8"/>
+  <rect x="390" y="285" width="420" height="8" fill="#C49B5C" rx="2" opacity="0.5"/>
+
+  <!-- Desk details -->
+  <rect x="420" y="310" width="120" height="60" fill="#333D4A" rx="4"/>
+  <rect x="425" y="315" width="110" height="45" fill="#5B92E5" rx="2" opacity="0.3"/>
+
+  <!-- Plant left -->
+  <rect x="160" y="310" width="30" height="50" fill="#8B7355" rx="4"/>
+  <ellipse cx="175" cy="300" rx="40" ry="35" fill="#5EC4B6" opacity="0.7"/>
+  <ellipse cx="160" cy="290" rx="25" ry="22" fill="#4DB3A5" opacity="0.6"/>
+  <ellipse cx="190" cy="295" rx="20" ry="18" fill="#6DD0C2" opacity="0.5"/>
+
+  <!-- Plant right -->
+  <rect x="1000" y="310" width="30" height="50" fill="#8B7355" rx="4"/>
+  <ellipse cx="1015" cy="300" rx="40" ry="35" fill="#5EC4B6" opacity="0.7"/>
+  <ellipse cx="1000" cy="290" rx="25" ry="22" fill="#4DB3A5" opacity="0.6"/>
+  <ellipse cx="1030" cy="295" rx="20" ry="18" fill="#6DD0C2" opacity="0.5"/>
+
+  <!-- Person 1 (receptionist) -->
+  <ellipse cx="560" cy="220" rx="22" ry="26" fill="#F0D5B8"/>
+  <rect x="538" y="246" width="44" height="55" fill="#5B92E5" rx="6"/>
+  <rect x="530" y="246" width="60" height="10" fill="#4A7ED0" rx="3"/>
+  <ellipse cx="552" cy="216" rx="10" ry="6" fill="#6B4226" transform="rotate(-15 552 216)"/>
+  <ellipse cx="568" cy="216" rx="10" ry="6" fill="#6B4226" transform="rotate(15 568 216)"/>
+  <circle cx="553" cy="222" r="2" fill="#22313F"/>
+  <circle cx="567" cy="222" r="2" fill="#22313F"/>
+  <path d="M556 232 Q560 236 564 232" fill="none" stroke="#22313F" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Person 2 (doctor with coat) -->
+  <ellipse cx="680" cy="200" rx="22" ry="26" fill="#F0D5B8"/>
+  <rect x="658" y="226" width="44" height="65" fill="#FFFFFF" rx="6" stroke="#E0E0E0" stroke-width="1"/>
+  <rect x="650" y="226" width="60" height="10" fill="#F0F0F0" rx="3"/>
+  <ellipse cx="680" cy="192" rx="24" ry="10" fill="#4A3520"/>
+  <circle cx="673" cy="202" r="2" fill="#22313F"/>
+  <circle cx="687" cy="202" r="2" fill="#22313F"/>
+  <path d="M676 212 Q680 216 684 212" fill="none" stroke="#22313F" stroke-width="1.5" stroke-linecap="round"/>
+  <rect x="668" y="248" width="24" height="4" fill="#5B92E5" rx="1"/>
+
+  <!-- Chair left -->
+  <rect x="240" y="360" width="80" height="50" fill="#5B92E5" rx="10" opacity="0.6"/>
+  <rect x="245" y="340" width="70" height="25" fill="#5B92E5" rx="8" opacity="0.5"/>
+
+  <!-- Chair right -->
+  <rect x="860" y="360" width="80" height="50" fill="#5B92E5" rx="10" opacity="0.6"/>
+  <rect x="865" y="340" width="70" height="25" fill="#5B92E5" rx="8" opacity="0.5"/>
+
+  <!-- Cross/medical symbol on wall -->
+  <rect x="570" y="110" width="60" height="60" fill="#F7FAFD" rx="12" stroke="#5B92E5" stroke-width="2"/>
+  <rect x="590" y="120" width="20" height="40" fill="#5B92E5" rx="3"/>
+  <rect x="580" y="130" width="40" height="20" fill="#5B92E5" rx="3"/>
+
+  <!-- Subtle text -->
+  <text x="600" y="470" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#8899AA" opacity="0.6">Hausarztpraxis am Rathaus Langenfeld</text>
+</svg>
